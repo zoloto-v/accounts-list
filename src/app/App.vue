@@ -13,7 +13,7 @@
 </template>
 
 <script setup lang="ts">
-import { Header } from '@/widgets/header';
+import { Header } from '@/shared/ui/header';
 import { AccountPage } from '@/pages/accounts';
 </script>
 
