@@ -47,13 +47,12 @@ const validateForm = async () => {
   return (res?.valid) ? Promise.resolve(true) : Promise.reject(false)
 }
 
-accountsStore.$subscribe((mutation, state) => {
+accountsStore.$subscribe(() => {
   (async () => {
     try {
       const isValid = await validateForm();
       if (isValid) {
-        // save here
-        console.log('state', state)
+        accountsStore.saveToLocalStorage()
       }
     } catch {
       console.error('form is not valid');
