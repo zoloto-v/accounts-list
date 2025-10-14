@@ -22,7 +22,7 @@ export const createAccount = (): IAccount => {
 export const useAccountStore = defineStore('account', () => {
   const accounts = ref(defaultAccountList)
 
-  function fetchAll() {
+  async function fetchAll() {
     // accounts.value.accounts = [
     //   {
     //     id: 'd23fc90c-39ce-4b15-bfde-9aabc560c2d4',
@@ -137,8 +137,8 @@ export const useAccountStore = defineStore('account', () => {
     ]
   }
 
-  function saveToLocalStorage() {
-    const accountTxt = JSON.stringify(accounts.value.accounts)
+  function saveToLocalStorage(accounts: Array<IAccount>) {
+    const accountTxt = JSON.stringify(accounts)
     localStorage.setItem('accountsList', accountTxt)
   }
 
