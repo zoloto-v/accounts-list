@@ -10,8 +10,8 @@ const formRef = ref<typeof import('vuetify/components')['VForm'] | null>(null)
 const accountsStore = useAccountStore()
 
 const rules = {
-  required: (value: string) => !!value || 'required',
-  maxLength: (l = 5) => (value: string) => value?.length < l || 'max length',
+  required: (value: string) => !!value || 'Поле обязательно',
+  maxLength: (l = 5) => (value: string) => value?.length < l || `Превышено число символов ${l}`,
 }
 
 onMounted(() => {
