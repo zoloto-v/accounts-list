@@ -2,13 +2,23 @@
 import { ref, onMounted } from 'vue'
 import { mdiDelete, mdiArrowLeft, mdiArrowRight } from '@mdi/js';
 import { useAccountStore } from '@/entities/accountList/model';
+import type { IAccount } from '@/entities/accountList/model/type';
 
 const accountsStore = useAccountStore()
 
 const itemsPerPage = ref(10)
 
 const remove = (id: string) => {
+  console.log(accountsStore.accounts.accounts)
   accountsStore.remove(id)
+}
+
+const labelsHandler = (id: string, payload: IAccount, newVal: string) => {
+  const value = newVal.split(';').map(text => ({ text }));
+  accountsStore.update(id, {
+    ...payload,
+    labels: value,
+  });
 }
 
 onMounted(() => {
@@ -20,28 +30,39 @@ onMounted(() => {
   <v-sheet border rounded="">
     <v-data-iterator :items="accountsStore.accounts.accounts" :items-per-page="itemsPerPage">
       <template v-slot:default="{ items }">
-        <v-table>
-          <thead>
-            <tr>
-              <th>Метки</th>
-              <th>Тип записи</th>
-              <th>Логин</th>
-              <th>Пароль</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(value, i) in items" :key="i">
-              <td>{{value.raw.labels?.map(v => v.text).join('')}}</td>
-              <td>{{ value.raw.type }}</td>
-              <td>{{ value.raw.login }}</td>
-              <td>{{ value.raw.password }}</td>
-              <td>
-                <v-icon :icon="mdiDelete" size="small" @click="remove(value.raw.id)"></v-icon>
-              </td>
-            </tr>
-          </tbody>
-        </v-table>
+        <v-form>
+          <v-table>
+            <thead>
+              <tr>
+                <th>Метки</th>
+                <th>Тип записи</th>
+                <th>Логин</th>
+                <th>Пароль</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(value, i) in items" :key="i">
+                <td>
+                  <v-text-field variant="underlined" :value="value.raw.labels?.map(v => v.text).join(';')"
+                    @update:model-value="(newVal) => labelsHandler(value.raw.id, value.raw, newVal)" />
+                </td>
+                <td>
+                  <v-select clearable :items="['LDAP', 'LOCAL']" variant="underlined" v-model="value.raw.type" />
+                </td>
+                <td>
+                  <v-text-field variant="underlined" v-model="value.raw.login" />
+                </td>
+                <td>
+                  <v-text-field variant="underlined" v-model="value.raw.password" />
+                </td>
+                <td>
+                  <v-icon :icon="mdiDelete" size="small" @click="remove(value.raw.id)" />
+                </td>
+              </tr>
+            </tbody>
+          </v-table>
+        </v-form>
       </template>
       <template v-slot:footer="{ page, pageCount, prevPage, nextPage }">
         <div class="d-flex align-center justify-center pa-4">

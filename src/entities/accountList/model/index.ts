@@ -26,7 +26,13 @@ export const useAccountStore = defineStore('account', () => {
         id: 'd23fc90c-39ce-4b15-bfde-9aabc560c2d4',
         labels: [
           {
-            text: 'Chevrolet Camaro 1900',
+            text: 'XXX',
+          },
+          {
+            text: 'UUU',
+          },
+          {
+            text: 'NNNNИИИ',
           },
         ],
         type: TYPE_TEXT['LDAP'],
@@ -35,63 +41,68 @@ export const useAccountStore = defineStore('account', () => {
       },
       {
         id: 'd23fc90c-a9ce-4b15-bfde-9aabc560c2d1',
-        labels: [{ text: 'Ford Mustang' }],
+        labels: [],
         type: 'LDAP',
         login: 'Ford Mustang',
         password: null,
       },
       {
         id: 'd23fc90c-55ce-4b15-bfde-9aabc560c2d4',
-        labels: [{ text: 'Dodge Charger' }],
+        labels: [
+          { text: 'DD' },
+          {
+            text: 'MMMM',
+          },
+        ],
         type: 'LDAP',
         login: 'Dodge Charger',
         password: null,
       },
       {
         id: 'd23fc90c-22ce-4b15-bfde-9aabc560c2d4',
-        labels: [{ text: 'Pontiac GTO' }],
+        labels: [{ text: 'MM' }, { text: 'YYYY' }],
         type: 'LOCAL',
         login: 'Pontiac GTO',
         password: '123456',
       },
       {
         id: 'd23fc90c-39ce-4b15-bfde-9aabc560ceee',
-        labels: [{ text: 'Plymouth Barracuda' }],
+        labels: [{ text: 'ddMM' }, { text: 'ssss' }],
         type: 'LOCAL',
         login: 'Plymouth Barracuda',
         password: '123456',
       },
       {
         id: 'd23fc90c-39ce-4b15-bfde-9aabc560cqqq',
-        labels: [{ text: 'Chevrolet Chevelle SS' }],
+        labels: [{ text: 'hhhhSS' }, { text: 'KKKK' }],
         type: 'LOCAL',
         login: 'Chevrolet Chevelle',
         password: '123456',
       },
       {
         id: 'd23fc90c-39ce-4b15-bfde-9aabc560c333',
-        labels: [{ text: 'Oldsmobile 442' }],
+        labels: [{ text: 'UUUU' }, { text: 'ddd' }],
         type: 'LOCAL',
         login: 'Oldsmobile 442',
         password: '123456',
       },
       {
         id: 'd23fc90c-39ce-4b15-bfde-9aabc560c211',
-        labels: [{ text: 'Dodge Challenger' }],
+        labels: [],
         type: 'LOCAL',
         login: 'Dodge Challenger',
         password: '123456',
       },
       {
         id: 'd23fc90c-39ce-4b15-bfde-9aabc560cvvv',
-        labels: [{ text: 'AMC Javelin' }],
+        labels: [{ text: 'yyyy' }],
         type: 'LOCAL',
         login: 'AMC Javelin',
         password: 'eeedddaaa',
       },
       {
         id: 'd23fc90c-39ce-4b15-bfde-9aabc560cuuu',
-        labels: [{ text: 'Mercury Cougar' }],
+        labels: [{ text: 'YYYY' }],
         type: 'LOCAL',
         login: 'Mercury Cougar',
         password: 'aaabbbccc',
@@ -107,7 +118,13 @@ export const useAccountStore = defineStore('account', () => {
     accounts.value.accounts = accounts.value.accounts.filter((a) => a.id !== id)
   }
 
+  function find(id: string) {
+    return accounts.value.accounts.find((a) => a.id === id)
+  }
+
   function update(id: string, value: IAccount) {
+    console.log('update', value)
+
     const index = accounts.value.accounts.findIndex((a) => a.id === id)
     accounts.value.accounts = [
       ...accounts.value.accounts.slice(0, index),
@@ -116,5 +133,5 @@ export const useAccountStore = defineStore('account', () => {
     ]
   }
 
-  return { accounts, add, remove, update, fetchAll }
+  return { accounts, add, remove, update, find, fetchAll }
 })
