@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted, onBeforeUnmount, onScopeDispose } from 'vue'
 import { mdiDelete, mdiArrowLeft, mdiArrowRight } from '@mdi/js';
 import { useAccountStore } from '@/entities/accountList/model';
 import { TYPE_TEXT, type IAccount } from '@/entities/accountList/model/type';
 import type { VForm } from 'vuetify/components';
 
 const itemsPerPage = ref(10)
-// const formRef = ref<typeof import('vuetify/components')['VForm'] | null>(null)
 const formRefs = ref<Record<string, InstanceType<typeof VForm>>>({})
 
 const accountsStore = useAccountStore()
@@ -19,17 +18,8 @@ const rules = {
 onMounted(() => {
   accountsStore.fetchAll()
 
-  accountsStore.$subscribe(() => {
+  const unsubscribe = accountsStore.$subscribe(() => {
     (async () => {
-      // try {
-      //   const isValid = await validateForm();
-      //   if (isValid) {
-      //     accountsStore.saveToLocalStorage()
-      //   }
-      // } catch {
-      //   console.error('form is not valid');
-      // }
-
       const validAccounts: Array<IAccount> = [];
 
       for (const account of accountsStore.accounts.accounts) {
@@ -44,6 +34,10 @@ onMounted(() => {
       accountsStore.saveToLocalStorage(validAccounts)
     })()
   }, { detached: false })
+
+  onScopeDispose(() => {
+    unsubscribe()
+  })
 })
 
 const onLabelInput = (id: string, payload: IAccount, newVal: string) => {
