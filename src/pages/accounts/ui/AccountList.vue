@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { mdiDelete, mdiArrowLeft, mdiArrowRight } from '@mdi/js';
 import { useAccountStore } from '@/entities/accountList/model';
-import type { IAccount } from '@/entities/accountList/model/type';
+import type { IAccount, TYPE_TEXT } from '@/entities/accountList/model/type';
 
 const accountsStore = useAccountStore()
 
@@ -13,7 +13,7 @@ const remove = (id: string) => {
   accountsStore.remove(id)
 }
 
-const labelsHandler = (id: string, payload: IAccount, newVal: string) => {
+const onLabelInput = (id: string, payload: IAccount, newVal: string) => {
   const value = newVal.split(';').map(text => ({ text }));
   accountsStore.update(id, {
     ...payload,
@@ -21,9 +21,31 @@ const labelsHandler = (id: string, payload: IAccount, newVal: string) => {
   });
 }
 
+const onTypeChange = (id: string, value: IAccount, newVal: keyof typeof TYPE_TEXT) => {
+  const currentValue = accountsStore.find(id);
+
+  if (currentValue) {
+    const updatedAccount = (newVal === 'LDAP') ? {
+      ...currentValue,
+      password: null,
+      type: newVal
+    } : {
+      ...currentValue,
+      type: newVal
+    }
+
+    accountsStore.update(id, updatedAccount)
+  }
+}
+
 onMounted(() => {
   accountsStore.fetchAll()
 })
+
+const rules = {
+  required: (value: string) => !!value || 'required',
+  maxLength: (l = 5) => (value: string) => value.length < l || 'max length',
+}
 </script>
 
 <template>
@@ -45,16 +67,20 @@ onMounted(() => {
               <tr v-for="(value, i) in items" :key="i">
                 <td>
                   <v-text-field variant="underlined" :value="value.raw.labels?.map(v => v.text).join(';')"
-                    @update:model-value="(newVal) => labelsHandler(value.raw.id, value.raw, newVal)" />
+                    @update:model-value="(newVal) => onLabelInput(value.raw.id, value.raw, newVal)"
+                    :rules="[rules.maxLength(50)]" maxlength="50" />
                 </td>
                 <td>
-                  <v-select clearable :items="['LDAP', 'LOCAL']" variant="underlined" v-model="value.raw.type" />
+                  <v-select @update:model-value="(newVal) => onTypeChange(value.raw.id, value.raw, newVal)"
+                    :items="['LDAP', 'LOCAL']" variant="underlined" :value="value.raw.type" />
                 </td>
                 <td>
-                  <v-text-field variant="underlined" v-model="value.raw.login" />
+                  <v-text-field variant="underlined" v-model="value.raw.login"
+                    :rules="[rules.required, rules.maxLength(100)]" maxlength="100" />
                 </td>
                 <td>
-                  <v-text-field variant="underlined" v-model="value.raw.password" />
+                  <v-text-field :disabled="value.raw.type === 'LDAP'" variant="underlined" v-model="value.raw.password"
+                    :rules="value.raw.type === 'LDAP' ? [] : [rules.required, rules.maxLength(100)]" maxlength="100" />
                 </td>
                 <td>
                   <v-icon :icon="mdiDelete" size="small" @click="remove(value.raw.id)" />
