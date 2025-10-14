@@ -9,12 +9,14 @@ const defaultAccountList: IAccountList = {
   accounts: [],
 }
 
-const defaultAccount: IAccount = {
-  id: String(new Date().getTime()),
-  labels: [],
-  type: TYPE_TEXT['LDAP'],
-  login: '',
-  password: null,
+export const createAccount = (): IAccount => {
+  return {
+    id: String(new Date().getTime()),
+    labels: [],
+    type: TYPE_TEXT['LDAP'],
+    login: '',
+    password: null,
+  }
 }
 
 export const useAccountStore = defineStore('account', () => {
@@ -72,46 +74,46 @@ export const useAccountStore = defineStore('account', () => {
         login: 'Plymouth Barracuda',
         password: '123456',
       },
-      {
-        id: 'd23fc90c-39ce-4b15-bfde-9aabc560cqqq',
-        labels: [{ text: 'hhhhSS' }, { text: 'KKKK' }],
-        type: 'LOCAL',
-        login: 'Chevrolet Chevelle',
-        password: '123456',
-      },
-      {
-        id: 'd23fc90c-39ce-4b15-bfde-9aabc560c333',
-        labels: [{ text: 'UUUU' }, { text: 'ddd' }],
-        type: 'LOCAL',
-        login: 'Oldsmobile 442',
-        password: '123456',
-      },
-      {
-        id: 'd23fc90c-39ce-4b15-bfde-9aabc560c211',
-        labels: [],
-        type: 'LOCAL',
-        login: 'Dodge Challenger',
-        password: '123456',
-      },
-      {
-        id: 'd23fc90c-39ce-4b15-bfde-9aabc560cvvv',
-        labels: [{ text: 'yyyy' }],
-        type: 'LOCAL',
-        login: 'AMC Javelin',
-        password: 'eeedddaaa',
-      },
-      {
-        id: 'd23fc90c-39ce-4b15-bfde-9aabc560cuuu',
-        labels: [{ text: 'YYYY' }],
-        type: 'LOCAL',
-        login: 'Mercury Cougar',
-        password: 'aaabbbccc',
-      },
+      // {
+      //   id: 'd23fc90c-39ce-4b15-bfde-9aabc560cqqq',
+      //   labels: [{ text: 'hhhhSS' }, { text: 'KKKK' }],
+      //   type: 'LOCAL',
+      //   login: 'Chevrolet Chevelle',
+      //   password: '123456',
+      // },
+      // {
+      //   id: 'd23fc90c-39ce-4b15-bfde-9aabc560c333',
+      //   labels: [{ text: 'UUUU' }, { text: 'ddd' }],
+      //   type: 'LOCAL',
+      //   login: 'Oldsmobile 442',
+      //   password: '123456',
+      // },
+      // {
+      //   id: 'd23fc90c-39ce-4b15-bfde-9aabc560c211',
+      //   labels: [],
+      //   type: 'LOCAL',
+      //   login: 'Dodge Challenger',
+      //   password: '123456',
+      // },
+      // {
+      //   id: 'd23fc90c-39ce-4b15-bfde-9aabc560cvvv',
+      //   labels: [{ text: 'yyyy' }],
+      //   type: 'LOCAL',
+      //   login: 'AMC Javelin',
+      //   password: 'eeedddaaa',
+      // },
+      // {
+      //   id: 'd23fc90c-39ce-4b15-bfde-9aabc560cuuu',
+      //   labels: [{ text: 'YYYY' }],
+      //   type: 'LOCAL',
+      //   login: 'Mercury Cougar',
+      //   password: 'aaabbbccc',
+      // },
     ]
   }
 
   function add() {
-    accounts.value.accounts.push(defaultAccount)
+    accounts.value.accounts.push(createAccount())
   }
 
   function remove(id: string) {
