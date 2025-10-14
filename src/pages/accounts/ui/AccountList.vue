@@ -4,14 +4,19 @@ import { mdiDelete, mdiArrowLeft, mdiArrowRight } from '@mdi/js';
 import { useAccountStore } from '@/entities/accountList/model';
 import type { IAccount, TYPE_TEXT } from '@/entities/accountList/model/type';
 
+const itemsPerPage = ref(10)
+const formRef = ref<typeof import('vuetify/components')['VForm'] | null>(null)
+
 const accountsStore = useAccountStore()
 
-const itemsPerPage = ref(10)
-
-const remove = (id: string) => {
-  console.log(accountsStore.accounts.accounts)
-  accountsStore.remove(id)
+const rules = {
+  required: (value: string) => !!value || 'required',
+  maxLength: (l = 5) => (value: string) => value?.length < l || 'max length',
 }
+
+onMounted(() => {
+  accountsStore.fetchAll()
+})
 
 const onLabelInput = (id: string, payload: IAccount, newVal: string) => {
   const value = newVal.split(';').map(text => ({ text }));
@@ -20,7 +25,6 @@ const onLabelInput = (id: string, payload: IAccount, newVal: string) => {
     labels: value,
   });
 }
-
 const onTypeChange = (id: string, value: IAccount, newVal: keyof typeof TYPE_TEXT) => {
   const currentValue = accountsStore.find(id);
 
@@ -37,22 +41,32 @@ const onTypeChange = (id: string, value: IAccount, newVal: keyof typeof TYPE_TEX
     accountsStore.update(id, updatedAccount)
   }
 }
-
-onMounted(() => {
-  accountsStore.fetchAll()
-})
-
-const rules = {
-  required: (value: string) => !!value || 'required',
-  maxLength: (l = 5) => (value: string) => value.length < l || 'max length',
+const validateForm = async () => {
+  const res = await formRef.value?.validate()
+  if (!res) return;
+  return (res?.valid) ? Promise.resolve(true) : Promise.reject(false)
 }
+
+accountsStore.$subscribe((mutation, state) => {
+  (async () => {
+    try {
+      const isValid = await validateForm();
+      if (isValid) {
+        // save here
+        console.log('state', state)
+      }
+    } catch {
+      console.error('form is not valid');
+    }
+  })()
+}, { detached: false })
 </script>
 
 <template>
   <v-sheet border rounded="">
     <v-data-iterator :items="accountsStore.accounts.accounts" :items-per-page="itemsPerPage">
       <template v-slot:default="{ items }">
-        <v-form>
+        <v-form ref="formRef">
           <v-table>
             <thead>
               <tr>
@@ -67,8 +81,7 @@ const rules = {
               <tr v-for="(value, i) in items" :key="i">
                 <td>
                   <v-text-field variant="underlined" :value="value.raw.labels?.map(v => v.text).join(';')"
-                    @update:model-value="(newVal) => onLabelInput(value.raw.id, value.raw, newVal)"
-                    :rules="[rules.maxLength(50)]" maxlength="50" />
+                    @update:model-value="(newVal) => onLabelInput(value.raw.id, value.raw, newVal)" maxlength="50" />
                 </td>
                 <td>
                   <v-select @update:model-value="(newVal) => onTypeChange(value.raw.id, value.raw, newVal)"
@@ -83,7 +96,7 @@ const rules = {
                     :rules="value.raw.type === 'LDAP' ? [] : [rules.required, rules.maxLength(100)]" maxlength="100" />
                 </td>
                 <td>
-                  <v-icon :icon="mdiDelete" size="small" @click="remove(value.raw.id)" />
+                  <v-icon :icon="mdiDelete" size="small" @click="accountsStore.remove(value.raw.id)" />
                 </td>
               </tr>
             </tbody>
