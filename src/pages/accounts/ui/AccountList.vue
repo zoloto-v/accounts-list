@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { mdiDelete, mdiArrowLeft, mdiArrowRight } from '@mdi/js';
 import { useAccountStore } from '@/entities/accountList/model';
-import type { IAccount, TYPE_TEXT } from '@/entities/accountList/model/type';
+import { TYPE_TEXT, type IAccount } from '@/entities/accountList/model/type';
 
 const itemsPerPage = ref(10)
 const formRef = ref<typeof import('vuetify/components')['VForm'] | null>(null)
@@ -85,7 +85,7 @@ accountsStore.$subscribe((mutation, state) => {
                 </td>
                 <td>
                   <v-select @update:model-value="(newVal) => onTypeChange(value.raw.id, value.raw, newVal)"
-                    :items="['LDAP', 'LOCAL']" variant="underlined" :value="value.raw.type" />
+                    :items="['LDAP', 'LOCAL']" variant="underlined" :value="TYPE_TEXT[value.raw.type]" />
                 </td>
                 <td>
                   <v-text-field variant="underlined" v-model="value.raw.login"
