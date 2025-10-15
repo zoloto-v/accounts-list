@@ -4,7 +4,10 @@ import { mdiDelete, mdiArrowLeft, mdiArrowRight } from '@mdi/js';
 import { useAccountStore } from '@/entities/accountList/model';
 import { TYPE_TEXT, type IAccount } from '@/entities/accountList/model/type';
 import type { VForm } from 'vuetify/components';
+import ConfirmDialog from './ConfirmDialog.vue';
 
+const accountId = ref<string | null>(null)
+const showModal = ref(false)
 const itemsPerPage = ref(10)
 const formRefs = ref<Record<string, InstanceType<typeof VForm>>>({})
 
@@ -63,17 +66,25 @@ const onTypeChange = (id: string, value: IAccount, newVal: keyof typeof TYPE_TEX
     accountsStore.update(id, updatedAccount)
   }
 }
+const deleteAccount = () => {
+  if (accountId.value)
+    accountsStore.remove(accountId.value)
+  onClose()
+}
+const showDeleteConfirm = (id: string) => {
+  showModal.value = true
+  accountId.value = id
+}
+const onClose = () => {
+  showModal.value = false
+}
 </script>
 
 <template>
   <v-card rounded="" class="pa-6">
     <v-data-iterator :items="accountsStore.accounts.accounts" :items-per-page="itemsPerPage">
       <template v-slot:default="{ items }">
-        <div :style="{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr 1fr 1fr 0.5fr',
-          gap: '20px',
-        }">
+        <div class="form">
           <div>Метки</div>
           <div>Тип записи</div>
           <div>Логин</div>
@@ -81,11 +92,7 @@ const onTypeChange = (id: string, value: IAccount, newVal: keyof typeof TYPE_TEX
           <div></div>
         </div>
         <div v-for="(value, i) in items" :key="i">
-          <v-form :ref="(el) => formRefs[value.raw.id] = el as VForm" :style="{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr 1fr 1fr 0.5fr',
-            gap: '20px',
-          }">
+          <v-form :ref="(el) => formRefs[value.raw.id] = el as VForm" class="form">
             <div>
               <v-text-field variant="underlined" :value="value.raw.labels?.map(v => v.text).join(';')"
                 @update:model-value="(newVal) => onLabelInput(value.raw.id, value.raw, newVal)" maxlength="50" />
@@ -102,59 +109,11 @@ const onTypeChange = (id: string, value: IAccount, newVal: keyof typeof TYPE_TEX
               <v-text-field :disabled="value.raw.type === 'LDAP'" variant="underlined" v-model="value.raw.password"
                 :rules="value.raw.type === 'LDAP' ? [] : [rules.required, rules.maxLength(100)]" maxlength="100" />
             </div>
-            <div :style="{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-            }">
-              <v-icon :icon="mdiDelete" size="small" @click="accountsStore.remove(value.raw.id)" />
+            <div class="center">
+              <v-icon :icon="mdiDelete" size="small" @click="() => showDeleteConfirm(value.raw.id)" />
             </div>
           </v-form>
         </div>
-
-        <!-- <v-table>
-          <thead>
-            <tr>
-              <th>Метки</th>
-              <th>Тип записи</th>
-              <th>Логин</th>
-              <th>Пароль</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(value, i) in items" :key="i">
-              <td colspan="5">
-                <v-form ref="(el) => formRefs[value.raw.id] = el">
-                  <table>
-                    <div>
-                      <v-text-field variant="underlined" :value="value.raw.labels?.map(v => v.text).join(';')"
-                        @update:model-value="(newVal) => onLabelInput(value.raw.id, value.raw, newVal)"
-                        maxlength="50" />
-                    </div>
-                    <div>
-                      <v-select @update:model-value="(newVal) => onTypeChange(value.raw.id, value.raw, newVal)"
-                        :items="['LDAP', 'LOCAL']" variant="underlined" :value="TYPE_TEXT[value.raw.type]" />
-                    </div>
-                    <div>
-                      <v-text-field variant="underlined" v-model="value.raw.login"
-                        :rules="[rules.required, rules.maxLength(100)]" maxlength="100" />
-                    </div>
-                    <div>
-                      <v-text-field :disabled="value.raw.type === 'LDAP'" variant="underlined"
-                        v-model="value.raw.password"
-                        :rules="value.raw.type === 'LDAP' ? [] : [rules.required, rules.maxLength(100)]"
-                        maxlength="100" />
-                    </div>
-                    <div>
-                      <v-icon :icon="mdiDelete" size="small" @click="accountsStore.remove(value.raw.id)" />
-                    </div>
-                  </table>
-                </v-form>
-              </td>
-            </tr>
-          </tbody>
-        </v-table> -->
       </template>
       <template v-slot:footer="{ page, pageCount, prevPage, nextPage }">
         <div class="d-flex align-center justify-center pa-4">
@@ -172,59 +131,19 @@ const onTypeChange = (id: string, value: IAccount, newVal: keyof typeof TYPE_TEX
     </v-data-iterator>
   </v-card>
 
-  <!-- <v-sheet border rounded="">
-    <v-data-iterator :items="accountsStore.accounts.accounts" :items-per-page="itemsPerPage">
-      <template v-slot:default="{ items }">
-        <v-form ref="formRef">
-          <v-table>
-            <thead>
-              <tr>
-                <th>Метки</th>
-                <th>Тип записи</th>
-                <th>Логин</th>
-                <th>Пароль</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(value, i) in items" :key="i">
-                <td>
-                  <v-text-field variant="underlined" :value="value.raw.labels?.map(v => v.text).join(';')"
-                    @update:model-value="(newVal) => onLabelInput(value.raw.id, value.raw, newVal)" maxlength="50" />
-                </td>
-                <td>
-                  <v-select @update:model-value="(newVal) => onTypeChange(value.raw.id, value.raw, newVal)"
-                    :items="['LDAP', 'LOCAL']" variant="underlined" :value="TYPE_TEXT[value.raw.type]" />
-                </td>
-                <td>
-                  <v-text-field variant="underlined" v-model="value.raw.login"
-                    :rules="[rules.required, rules.maxLength(100)]" maxlength="100" />
-                </td>
-                <td>
-                  <v-text-field :disabled="value.raw.type === 'LDAP'" variant="underlined" v-model="value.raw.password"
-                    :rules="value.raw.type === 'LDAP' ? [] : [rules.required, rules.maxLength(100)]" maxlength="100" />
-                </td>
-                <td>
-                  <v-icon :icon="mdiDelete" size="small" @click="accountsStore.remove(value.raw.id)" />
-                </td>
-              </tr>
-            </tbody>
-          </v-table>
-        </v-form>
-      </template>
-      <template v-slot:footer="{ page, pageCount, prevPage, nextPage }">
-        <div class="d-flex align-center justify-center pa-4">
-          <v-btn :disabled="page === 1" density="comfortable" :icon="mdiArrowLeft" variant="tonal" rounded
-            @click="prevPage"></v-btn>
-
-          <div class="mx-2 text-caption">
-            Страница {{ page }} из {{ pageCount }}
-          </div>
-
-          <v-btn :disabled="page >= pageCount" density="comfortable" :icon="mdiArrowRight" variant="tonal" rounded
-            @click="nextPage"></v-btn>
-        </div>
-      </template>
-    </v-data-iterator>
-  </v-sheet> -->
+  <ConfirmDialog :showModal="showModal" :onApprove="deleteAccount" :onClose="onClose" title="Подтвердить удаление?" />
 </template>
+
+<style scoped>
+.form {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 0.5fr;
+  gap: 20px;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+</style>
